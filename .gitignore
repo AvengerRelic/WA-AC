@@ -1,0 +1,10 @@
+node_modules
+.env
+dev.db
+dev.db-journal
+dist
+.expo
+android-client/.expo
+android-client/node_modules
+backend/node_modules
+backend/dist
