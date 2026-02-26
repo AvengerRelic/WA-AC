@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "98897170307",
+    "project_id": "ac-nhapp",
+    "storage_bucket": "ac-nhapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:98897170307:android:4021979d0bea1fca1070b6",
+        "android_client_info": {
+          "package_name": "com.example.nhapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA4qkeTdkaZiiFC8pmcHINKdqpOvseA1Fw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
