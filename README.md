@@ -66,3 +66,5 @@ If you are deploying for the first time:
 1. Run `vercel` globally via CLI from the `android-client` directory.
 2. Authenticate through the browser popup.
 3. Link the automatic Vercel build to the `main` GitHub branch.
+
+> Note: To see changes in your Source Control Tab, edit this file or any code file!
