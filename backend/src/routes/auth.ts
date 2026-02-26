@@ -104,7 +104,10 @@ router.get('/chats', async (req, res) => {
 
         const formattedChats = chats.map(chat => {
             const otherUser = chat.participants.find(p => p.id !== decoded.userId) || chat.participants[0];
-            const lastMessage = chat.messages.length > 0 ? chat.messages[0].content : '';
+            let lastMessage = '';
+            if (chat.messages.length > 0) {
+                lastMessage = chat.messages[0].content || (chat.messages[0].mediaUrl ? '📷 Image' : '');
+            }
             return {
                 id: chat.id,
                 isGroup: chat.isGroup,
@@ -115,9 +118,47 @@ router.get('/chats', async (req, res) => {
             };
         });
 
-        res.json(formattedChats);
+        const uniqueChats = new Map();
+
+        for (const chat of formattedChats) {
+            const key = chat.isGroup ? chat.id : chat.receiver.id;
+            if (!uniqueChats.has(key)) {
+                uniqueChats.set(key, chat);
+            } else {
+                if (new Date(chat.updatedAt) > new Date(uniqueChats.get(key).updatedAt)) {
+                    uniqueChats.set(key, chat);
+                }
+            }
+        }
+
+        const sortedUniqueChats = Array.from(uniqueChats.values()).sort((a: any, b: any) =>
+            new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+        );
+
+        res.json(sortedUniqueChats);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch chats' });
+    }
+});
+
+router.get('/chats/:id/messages', async (req, res) => {
+    try {
+        const authHeader = req.headers.authorization;
+        if (!authHeader) return res.status(401).json({ error: 'Unauthorized' });
+        const token = authHeader.split(' ')[1];
+        jwt.verify(token, JWT_SECRET);
+
+        const chatId = req.params.id;
+
+        const messages = await prisma.message.findMany({
+            where: { chatId },
+            orderBy: { createdAt: 'asc' }
+        });
+
+        res.json(messages);
+    } catch (error) {
+        console.error('Error fetching messages:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
 });
 

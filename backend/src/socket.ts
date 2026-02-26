@@ -36,14 +36,26 @@ export const setupSocketServer = (io: Server) => {
 
                 // Create direct chat if it doesn't exist yet and receiverId is provided
                 if (!data.chatId && data.receiverId) {
-                    chat = await prisma.chat.create({
-                        data: {
+                    chat = await prisma.chat.findFirst({
+                        where: {
                             isGroup: false,
-                            participants: {
-                                connect: [{ id: socket.data.userId }, { id: data.receiverId }]
-                            }
+                            AND: [
+                                { participants: { some: { id: socket.data.userId } } },
+                                { participants: { some: { id: data.receiverId } } }
+                            ]
                         }
                     });
+
+                    if (!chat) {
+                        chat = await prisma.chat.create({
+                            data: {
+                                isGroup: false,
+                                participants: {
+                                    connect: [{ id: socket.data.userId }, { id: data.receiverId }]
+                                }
+                            }
+                        });
+                    }
                     finalChatId = chat.id;
                 }
 
