@@ -1,5 +1,6 @@
 package com.example.nhapp
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -14,12 +15,17 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.nhapp.data.SupabaseNetwork
 import com.example.nhapp.ui.*
 import com.example.nhapp.ui.theme.NHAppTheme
+import io.github.jan.supabase.gotrue.handleDeeplinks
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        intent?.let { handleSupabaseDeeplink(it) }
+
         setContent {
             NHAppTheme {
                 Surface(
@@ -31,6 +37,15 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleSupabaseDeeplink(intent)
+    }
+
+    private fun handleSupabaseDeeplink(intent: Intent) {
+        SupabaseNetwork.client.handleDeeplinks(intent)
+    }
 }
 
 @Composable
@@ -39,9 +54,10 @@ fun NHAppNavigation() {
     val authViewModel: AuthViewModel = viewModel()
     val authState by authViewModel.authState.collectAsState()
 
+    // BYPASS: Forcing the app to start at chat_list and ignore authentication for now
     NavHost(
         navController = navController,
-        startDestination = if (authState is AuthState.Authenticated) "chat_list" else "auth"
+        startDestination = "chat_list"
     ) {
         composable("auth") {
             AuthScreen(viewModel = authViewModel)

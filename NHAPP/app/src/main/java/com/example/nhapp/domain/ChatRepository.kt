@@ -3,10 +3,10 @@ package com.example.nhapp.domain
 import com.example.nhapp.data.Chat
 import com.example.nhapp.data.Message
 import com.example.nhapp.data.SupabaseNetwork
-import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.realtime.PostgresAction
 import io.github.jan.supabase.realtime.channel
 import io.github.jan.supabase.realtime.postgresChangeFlow
+import io.github.jan.supabase.realtime.decodeRecord
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -14,11 +14,7 @@ class ChatRepository {
     private val db = SupabaseNetwork.db
     private val realtime = SupabaseNetwork.realtime
 
-    // --- Static Queries ---
-    
     suspend fun getMyChats(): List<Chat> {
-        // Because of RLS, simply selecting from "chats" will only return 
-        // chats that the current user is a member of.
         return db["chats"]
             .select()
             .decodeList<Chat>()
@@ -43,11 +39,8 @@ class ChatRepository {
         db["messages"].insert(payload)
     }
 
-    // --- Realtime Subscriptions ---
-
-    suspend fun listenForNewMessages(chatId: String): Flow<Message> {
-        val channel = realtime.channel("public:messages:chat_id=eq.$chatId")
-        channel.subscribe()
+    fun listenForNewMessages(chatId: String): Flow<Message> {
+        val channel = realtime.channel("chat_$chatId")
 
         return channel.postgresChangeFlow<PostgresAction.Insert>(schema = "public") {
             table = "messages"

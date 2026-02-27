@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class AuthViewModel : ViewModel() {
-    private val authRepository = AuthRepository()
+    private val authRepository = AuthRepository
 
     private val _authState = MutableStateFlow<AuthState>(AuthState.Idle)
     val authState: StateFlow<AuthState> = _authState
@@ -38,7 +38,6 @@ class AuthViewModel : ViewModel() {
             _authState.value = AuthState.Loading
             try {
                 authRepository.verifyEmailOtp(email, token)
-                // The realtime session flow will automatically push state to Authenticated
             } catch (e: Exception) {
                 _authState.value = AuthState.Error(e.message ?: "Failed to verify OTP")
             }
